@@ -1,0 +1,117 @@
+#include <cstdio>
+#include <cstring>
+#include <unistd.h>
+
+char* wordSet[6];
+int numWords[6];
+char cryptResult[16];
+char wordBuffer[8];
+int wordBufferIdx = 0;
+const int range[6][2] = {{3,6}, {2,5}, {1,4}, {1,3}, {1,2}, {1,1}};
+
+inline void tryToCrackPassword()
+{
+	const int startRange = range[wordBufferIdx - 1][0];
+	const int endRange = range[wordBufferIdx - 1][1];
+	char buffer[16];
+
+	// Check for 5,6,7 & 8 letter passwords.
+	memcpy(buffer, wordBuffer, wordBufferIdx);
+
+	for (int pairWordLen = startRange; pairWordLen <= endRange; ++pairWordLen)
+	{
+		buffer[wordBufferIdx + 1 + pairWordLen] = '\0';
+
+		for (int i = numWords[pairWordLen - 1] - 1; i != -1; --i)
+		{
+			memcpy(&buffer[wordBufferIdx + 1], &wordSet[pairWordLen - 1][i * pairWordLen], pairWordLen);
+
+			buffer[wordBufferIdx] = '0';
+			if (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12) ||
+				((buffer[wordBufferIdx] = '2') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))) ||
+				((buffer[wordBufferIdx] = '4') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))) ||
+				((buffer[wordBufferIdx] = '8') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))))
+			{
+				printf("%s\n", buffer);
+				fflush(stdout);
+				_exit(1);
+			}
+		}
+	}
+
+	memcpy(&buffer[8], wordBuffer, wordBufferIdx);
+	buffer[8 + wordBufferIdx] = '\0';
+	for (int pairWordLen = startRange; pairWordLen <= endRange; ++pairWordLen)
+	{
+		for (int i = numWords[pairWordLen - 1] - 1; i != -1; --i)
+		{
+			char* startOffset = &buffer[7 - pairWordLen];
+			memcpy(startOffset, &wordSet[pairWordLen - 1][i * pairWordLen], pairWordLen);
+
+			buffer[7] = '0';
+			if (!memcmp(&cryptResult[1], &crypt(startOffset, cryptResult)[1], 12) ||
+				((buffer[7] = '2') && (!memcmp(&cryptResult[1], &crypt(startOffset, cryptResult)[1], 12))) ||
+				((buffer[7] = '4') && (!memcmp(&cryptResult[1], &crypt(startOffset, cryptResult)[1], 12))) ||
+				((buffer[7] = '8') && (!memcmp(&cryptResult[1], &crypt(startOffset, cryptResult)[1], 12))))
+			{
+				printf("%s\n", startOffset);
+				fflush(stdout);
+				_exit(1);
+			}
+		}
+	}
+}
+
+int main(int argc, char** argv)
+{
+	for (int i = 0; i < 6; ++i)
+		wordSet[i] = new char[(i+1) * 88];
+
+	FILE* fp = fopen(argv[1], "r");
+	fgets(cryptResult, sizeof(cryptResult), fp);
+
+	register int singleChar;
+	while ((singleChar = getc(fp)) != EOF)
+	{
+		if (singleChar <= 'Z')
+			singleChar += 'a' - 'A';
+
+		if ((singleChar >= 'a') && (singleChar <= 'z'))
+		{
+			if (++wordBufferIdx < 7)
+				wordBuffer[wordBufferIdx - 1] = (char) singleChar;
+
+			continue;
+		}
+
+		if (wordBufferIdx && (wordBufferIdx < 7))
+		{
+			int i = numWords[wordBufferIdx - 1] - 1;
+			for (; i != -1; --i)
+				if (!memcmp(&wordSet[wordBufferIdx - 1][i * wordBufferIdx], wordBuffer, wordBufferIdx))
+					break;
+			if (i == -1)
+			{
+				tryToCrackPassword();
+				memcpy(&wordSet[wordBufferIdx - 1][numWords[wordBufferIdx - 1]++ * wordBufferIdx], wordBuffer, wordBufferIdx);
+			}
+		}
+
+		wordBufferIdx = 0;
+	}
+
+	if (wordBufferIdx && (wordBufferIdx < 7))
+	{
+		int i = numWords[wordBufferIdx - 1] - 1;
+		for (; i != -1; --i)
+			if (!memcmp(&wordSet[wordBufferIdx - 1][i * wordBufferIdx], wordBuffer, wordBufferIdx))
+				break;
+		if (i == -1)
+		{
+			tryToCrackPassword();
+			memcpy(&wordSet[wordBufferIdx - 1][numWords[wordBufferIdx - 1]++ * wordBufferIdx], wordBuffer, wordBufferIdx);
+		}
+	}
+
+	return 0;
+}

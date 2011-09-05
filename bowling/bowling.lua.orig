@@ -1,0 +1,46 @@
+function getScore(scores, numScore)
+    if scores[numScore] == 'X' then scores[numScore] = int(10)
+    else if scores[numScore] == '/' then scores[numScore] = 10 - int(scores[numScore - 1])
+	end 
+end
+
+print(io.lines(arg[1]))
+for line in io.lines(arg[1]) do
+	scores = tonumber(line)
+	local totalScore = 0
+	local numCompletedFrames = 0
+	local isFrameAboutToComplete = 0
+	local i = 0
+
+	print(totalScore)
+
+	getScore(scores, 0)
+	getScore(scores, 1)
+
+	while numCompletedFrames < 10 do
+		print(totalScore)
+		if i+2 < #scores then
+			getScore(scores, i+2)
+		end
+		totalScore = totalScore + scores[i]
+
+		if isFrameAboutToComplete == 1 then
+			if ((scores[i-1]) + (scores[i])) == 10 then
+				totalScore = totalScore + scores[i+1]
+			end
+			numCompletedFrames = numCompletedFrames + 1
+			isFrameAboutToComplete = 0
+		else if scores[i] == 10 then
+			totalScore = totalScore + scores[i+1] + scores[i+2]
+			numCompletedFrames = numCompletedFrames + 1
+		else
+			isFrameAboutToComplete = 1
+		end
+
+		i = i + 1
+	end
+
+	print(totalScore)
+end
+end
+end
