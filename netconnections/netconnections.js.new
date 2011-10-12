@@ -1,0 +1,55 @@
+function getSubNetId(i) {
+    return ((nodeInfo[i] & SUBNET_ID_MASK) == i) ? i : nodeInfo[i] = getSubNetId(nodeInfo[i] & SUBNET_ID_MASK);
+}
+
+ORIG_SUBNET_ID_FLAG = 0x80000000;
+SUBNET_ID_MASK = 0x7fffffff;
+BUFFER_SZ = 4096 * 8;
+y=0
+n=0
+f = fopen(arguments[0],0)
+rdBuf = fread(f, BUFFER_SZ)
+rdBytes = rdBuf.length
+endOffset = 0
+currentOffset = rdBuf.indexOf('\n', 1)
+nNodes = parseInt(rdBuf)
+nodeInfo = []
+for (i=1; i < nNodes+1; ++i) {
+	nodeInfo[i] = 0;
+}
+
+do {
+	endOffset = rdBuf.lastIndexOf('\n', rdBytes - 24)
+	while (++currentOffset < endOffset) {
+		isConnData = rdBuf[currentOffset] == 'c'
+		n1 = parseInt(rdBuf.substr(currentOffset+2, 10))
+		n2 = parseInt(rdBuf.substr(rdBuf.indexOf(' ', currentOffset + 2), 10))
+		if (isConnData) {
+			if ((nodeInfo[n1] != 0) && (nodeInfo[n2] != 0)) {
+				v1 = getSubNetId(n1);
+				v2 = getSubNetId(n2);
+				if (v1 != v2) {
+					nodeInfo[n2] = v1;
+					nodeInfo[v2] = v1;
+				}
+			} else if ((nodeInfo[n1] != 0) || (nodeInfo[n2] != 0)) {
+				if (nodeInfo[n1] != 0)
+					nodeInfo[n2] = getSubNetId(n1);
+				else
+					nodeInfo[n1] = getSubNetId(n2);
+			} else {
+				nodeInfo[n2] = n1;
+				nodeInfo[n1] = n1 | ORIG_SUBNET_ID_FLAG;
+			}
+		} else if ((nodeInfo[n1] != 0 && nodeInfo[n2] != 0) && (getSubNetId(n1) == getSubNetId(n2))) {
+			++y;
+		} else {
+			++n;
+		}
+		currentOffset = rdBuf.indexOf('\n', currentOffset + 5)
+	}
+	rdBuf = rdBuf.substring(currentOffset+1)
+	rdBuf += fread(f, BUFFER_SZ - rdBuf.length)
+} while (rdBytes = rdBuf.length)
+
+print(y + "," + n)

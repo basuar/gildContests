@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
+
+#define likely(x) __builtin_expect((x), 1)
+#define unlikely(x) __builtin_expect((x), 0)
+#define extractCount(x) ((x) & 0x03)
+#define extractPlayer(x) ((x) >> 2)
+#define setPlayer(x) (((x) - '0') << 2)
+#define BUFFER_SZ (4096 * 16)
+
+static const char * const resultString[] = { 0, "1\n", "2\n", "draw\n", "play\n" };
+int main(int z, char **v)
+{
+	char rdBuf[BUFFER_SZ + 1], *endPtr = rdBuf;
+	int fd = open(v[1], O_RDONLY); posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+	int rdBytes = read(fd, rdBuf, BUFFER_SZ);
+	register char *rdPtr = rdBuf;
+	const register unsigned int cols = (strchr(rdPtr, '\n') + 1 - rdPtr) / 2;
+	register unsigned int returnCode = (*rdPtr == '0') ? 4 : 3;
+	register unsigned int currentRowIdx = 0;
+	unsigned char we[cols], ns[cols], nesw[cols+1], nwse[2][cols];
+	unsigned char *_we = we, *_ns = ns, *_nesw = nesw, *_nwse = nwse[0];
+	nesw[cols]= 0; *_we = *_ns = *_nwse = *_nesw = (*rdPtr == '0') ? 0 : setPlayer(*rdPtr);
+	for (register int i=1; (i < cols); ++i) {
+		++_we; ++_ns; ++_nesw; ++_nwse; rdPtr += 2;
+		if (*rdPtr == '0') { *_we = *_ns = *_nwse = *_nesw = 0; returnCode = 4; }
+		else {
+			const register unsigned char value = setPlayer(*rdPtr);
+			*_ns = *_nwse = *_nesw = value;
+			*_we = (extractPlayer(*(_we - 1)) == (*rdPtr - '0')) ? (1 + *(_we - 1)) : value;
+			if (unlikely(extractCount(*_we) == 3)) { write(1, resultString[value >> 2], 2); _exit(0); }
+		}
+	}
+	rdPtr += 2; 
+	do {
+		endPtr += rdBytes;
+		*endPtr = 0;
+		const char* const lastLF = strchr(endPtr - (cols << 1), '\n');
+		while (rdPtr < lastLF) {
+			currentRowIdx = 1 - currentRowIdx;
+			_we = we; _ns = ns; _nesw = nesw; _nwse = nwse[currentRowIdx];
+			if ((*rdPtr != '0')) {
+				const register unsigned char value = setPlayer(*rdPtr);
+				const register unsigned char player = *rdPtr - '0';
+				*_we = *_nwse = value;
+				*_ns = (extractPlayer(*_ns) == player) ? 1 + *_ns : value;
+				*_nesw = (extractPlayer(*(_nesw + 1)) == player) ? 1 + *(_nesw + 1) : value;
+				if (((extractCount(*_ns) == 3) || (extractCount(*_nesw) == 3))) { write(1, resultString[value >> 2], 2); _exit(0); }
+			} else { *_we = *_ns = *_nwse = *_nesw = 0; }
+			for (register int i = 1; (i < cols); ++i) {
+				++_we; ++_ns; ++_nesw; ++_nwse; rdPtr += 2;
+				if ((*rdPtr != '0')) {
+					const register unsigned char value = setPlayer(*rdPtr);
+					const register unsigned char player = *rdPtr - '0';
+					*_we = (extractPlayer(*(_we - 1)) == player) ? 1 + *(_we - 1) : value;
+					*_ns = (extractPlayer(*_ns) == player) ? 1 + *_ns : value;
+					*_nwse = (extractPlayer(nwse[1 - currentRowIdx][i - 1]) == player) ? 1 + nwse[1 - currentRowIdx][i - 1] : value;
+					*_nesw = (extractPlayer(*(_nesw + 1)) == player) ? 1 + *(_nesw + 1) : value;
+					if ((((extractCount(*_we) == 3) || (extractCount(*_ns) == 3) || (extractCount(*_nwse) == 3) || (extractCount(*_nesw) == 3)))) { write(1, resultString[value >> 2], 2); _exit(0); }
+				} else { *_we = *_ns = *_nwse = *_nesw = 0; }
+			}
+			rdPtr += 2;
+		}
+        rdPtr = rdBuf;
+        rdBytes = endPtr - (lastLF + 1);
+		memcpy(rdBuf, lastLF + 1, rdBytes);
+        endPtr = rdBuf + rdBytes;
+	} while (rdBytes = read(fd, endPtr, BUFFER_SZ - rdBytes));
+	write(1, resultString[returnCode], 5); _exit(0);
+}
