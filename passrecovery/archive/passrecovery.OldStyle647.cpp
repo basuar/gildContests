@@ -1,169 +1,220 @@
-#include <iostream>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{codeCrumbs}</title>
+    <link href="codeCrumbs.css" media="screen" rel="stylesheet" type="text/css" />
+    <script src="ace-0.2.0/ace-0.2.0/src/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+      window.onload = function() {
+      var editor = ace.edit("editor"); };
+    </script>
+  </head>
+  <body>
+<!--     <div class="wideLayer topLayer">
+      <div class="contentBox">
+      <span class="logo"><b><i>{codeCrumbs}</i></b></span>
+      </div>
+    </div> -->
+    <div class="wideLayer topLayer">
+      <div class="contentBox sharp-text">
+      / codeCrumbs / basuar / xvczgfhtty
+    </div>
 
-char* wordSet[6];
-int numWords[8];
-char cryptResult[16];
-char wordBuffer[8];
-int wordBufferIdx = 0;
+    <div class="wideLayer centralLayer">
+      <div class="subnav-bar">
+        <ul class="subnav with-scope">
+          <img src="binaryDoc.jpg" style="padding: 0 15px;"/>
+          <li><a highlight="repo_source" class="selected" href="">Code</a></li>
+          <li><a highlight="repo_source" href="">History</a></li>
+        </ul>
+      </div>
 
-inline void tryToCrackPassword()
-{
-	int startRange, endRange;
-	char buffer[9];
+      <div class="contentBox" style="padding: 5px 0 15px 0; height: 20px; text-align: right;">
+      <div class="contentBox sharp-text">
+        /  <a href="">codeCrumbs</a> / Code :: <a href="">Save</a> / <a href="">Edit</a> / <a href="">Fork</a> /
+      </div>
+      </div>
 
-	// Check for 5,6,7 & 8 letter passwords.
-	switch (wordBufferIdx)
-	{
-		case 1:
-		{
-			// Check with 3, 4, 5 & 6 letter words.
-			startRange = 3;
-			endRange = 6;
-		}
-		break;
+      <div class id="editor"></div>
+    </div>
 
-		case 2:
-		{
-			// Check with 2, 3, 4 & 5 letter words.
-			startRange = 2;
-			endRange = 5;
-		}
-		break;
+    <div class="wideLayer bottomLayer">
+      <div class="contentBox sharp-text">
+        / <a href="">Wiki</a> / <a href="">Support</a> / <a href="">Feedback</a> /
+      </div>
+    </div>
+  </body>
+</html>
 
-		case 3:
-		{
-			// Check with 1, 2, 3 & 4 letter words.
-			startRange = 1;
-			endRange = 4;
-		}
-		break;
 
-		case 4:
-		{
-			// Check with 1, 2 & 3 letter words.
-			startRange = 1;
-			endRange = 3;
-		}
-		break;
 
-		case 5:
-		{
-			// Check with 1 & 2 letter words.
-			startRange = 1;
-			endRange = 2;
-		}
-		break;
-
-		case 6:
-		{
-			// Check with 1 letter words.
-			startRange = 1;
-			endRange = 1;
-		}
-		break;
-	}
-
-	memcpy(buffer, wordBuffer, wordBufferIdx);
-
-	// Check with 3, 4, 5 & 6 letter words.
-	for (int pairWordLen = startRange; pairWordLen <= endRange; ++pairWordLen)
-	{
-		buffer[wordBufferIdx + 1 + pairWordLen] = '\0';
-
-		for (int i = numWords[pairWordLen - 1] - 1; i != -1; --i)
-		{
-			memcpy(&buffer[wordBufferIdx + 1], &wordSet[pairWordLen - 1][i * pairWordLen], pairWordLen);
-
-			buffer[wordBufferIdx] = '0';
-			if (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12) ||
-				((buffer[wordBufferIdx] = '2') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))) ||
-				((buffer[wordBufferIdx] = '4') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))) ||
-				((buffer[wordBufferIdx] = '8') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))))
-			{
-				printf("%s\n", buffer);
-				fflush(stdout);
-				_exit(1);
-			}
-		}
-	}
-
-	for (int pairWordLen = startRange; pairWordLen <= endRange; ++pairWordLen)
-	{
-		memcpy(&buffer[pairWordLen + 1], wordBuffer, wordBufferIdx);
-		buffer[wordBufferIdx + 1 + pairWordLen] = '\0';
-
-		for (int i = numWords[pairWordLen - 1] - 1; i != -1; --i)
-		{
-			memcpy(buffer, &wordSet[pairWordLen - 1][i * pairWordLen], pairWordLen);
-
-			buffer[pairWordLen] = '0';
-			if (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12) ||
-				((buffer[pairWordLen] = '2') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))) ||
-				((buffer[pairWordLen] = '4') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))) ||
-				((buffer[pairWordLen] = '8') && (!memcmp(&cryptResult[1], &crypt(buffer, cryptResult)[1], 12))))
-			{
-				printf("%s\n", buffer);
-				fflush(stdout);
-				_exit(1);
-			}
-		}
-	}
+* {
+    margin: 0;
+    padding: 0;
 }
 
-int main(int argc, char** argv)
-{
-	for (int i = 0; i < 6; ++i)
-		wordSet[i] = (char*) malloc((i+1) * 128);
+body, html {
+  height: 100%;
+  width: 100%;
+  background: #eee;
+  color: #333;
+  font: 11px helvetica,arial,freesans,clean,sans-serif;
+}
 
-	FILE* fp = fopen(argv[1], "r");
-	fgets(cryptResult, sizeof(cryptResult), fp);
+a {
+  color: #333;
+  padding: 5px;
+  text-decoration: none;
+}
 
-	register int singleChar;
-	while ((singleChar = getc(fp)) != EOF)
-	{
-		if (singleChar <= 'Z')
-			singleChar += 'a' - 'A';
+.bottomLayer a {
+  padding-bottom: 30px;
+  text-decoration: none;
+  text-shadow: 0px 1px 0px #ddd;
+}
 
-		if ((singleChar >= 'a') && (singleChar <= 'z'))
-		{
-			if (++wordBufferIdx < 7)
-				wordBuffer[wordBufferIdx - 1] = (char) singleChar;
+.bottomLayer a:hover {
+  border-top: 2px solid #000;
+  color: #000;
+}
 
-			continue;
-		}
+.wideLayer {
+  width: 100%;
+}
 
-		if (wordBufferIdx && (wordBufferIdx < 7))
-		{
-			int i = numWords[wordBufferIdx - 1] - 1;
-			for (; i != -1; --i)
-				if (!memcmp(&wordSet[wordBufferIdx - 1][i * wordBufferIdx], wordBuffer, wordBufferIdx))
-					break;
-			if (i == -1)
-			{
-				tryToCrackPassword();
-				memcpy(&wordSet[wordBufferIdx - 1][numWords[wordBufferIdx - 1]++ * wordBufferIdx], wordBuffer, wordBufferIdx);
-			}
-		}
+.contentBox {
+  position: relative;
+  width: 900px;
+  margin: auto;
+}
 
-		wordBufferIdx = 0;
-	}
+.topLayer {
+  padding: 10px 0;
+  height: 30px;
+  background: #fff;
+  border-bottom: 1px solid #cccccc;
+}
 
-	if (wordBufferIdx && (wordBufferIdx < 7))
-	{
-		int i = numWords[wordBufferIdx - 1] - 1;
-		for (; i != -1; --i)
-			if (!memcmp(&wordSet[wordBufferIdx - 1][i * wordBufferIdx], wordBuffer, wordBufferIdx))
-				break;
-		if (i == -1)
-		{
-			tryToCrackPassword();
-			memcpy(&wordSet[wordBufferIdx - 1][numWords[wordBufferIdx - 1]++ * wordBufferIdx], wordBuffer, wordBufferIdx);
-		}
-	}
+.logo {
+#  font-size: 85%;
+#  text-transform: uppercase;
+  text-shadow: 0px 0px 1px #555;
+  letter-spacing: 1px;
+  color: #555;
+  font-size: 22px;
+  font-family: "Lucida Grande", Verdana, Helvetica, Arial, sans-serif;
+  font-weight: 100;
+}
 
-	return 0;
+.centralLayer {
+  background: #ffffff;
+  height: 800px;
+  padding: 20px 0;
+}
+
+.subnav-bar {
+  border-bottom: 1px solid #DDDDDD;
+  margin: 10px auto;
+  width: 900px;
+  height: 23px;
+}
+
+.subnav-bar ul.subnav {
+    font-size: 14px;
+}
+
+.subnav-bar ul.subnav li {
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.subnav-bar ul.subnav li:first-child {
+  padding-left: 50px;
+}
+
+.subnav-bar ul.subnav li a {
+    padding: 8px;
+}
+
+.subnav-bar ul.subnav li a.selected {
+    background-color: #fff;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    color: #333333;
+    font-weight: bold;
+}
+
+#editor {
+  position: relative;
+  width: 900px;
+  height: 700px;
+  border: 1px solid #ccc;
+  margin: auto;
+}
+
+.bottomLayer {
+  height: 50px;
+  padding-top: 15px;
+  text-align: right;
+  border-top: 1px solid #cccccc;
+}
+
+.upper_footer ul.footer_nav {
+    float: right;
+    margin: 20px 10px;
+    position: relative;
+    width: 164px;
+}
+
+.letterPressedLogo {
+  padding: 15px;
+  width: 300px;
+  height: 35px;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: italic;
+  text-transform: none;
+  background: #474747;
+  color: #222;
+  text-shadow: 0 2px 3px #555;
+  border-radius: 3px 3px 3px 3px;
+}
+
+.sharp-text {
+  font-size: 85%;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #bbb;
+  font-size: 10px;
+  font-family: "Lucida Grande", Verdana, Helvetica, Arial, sans-serif;
+  font-weight: 100;
+}
+
+.minibutton {
+    background: -moz-linear-gradient(#F4F4F4, #ECECEC) repeat scroll 0 0 transparent;
+    border: 1px solid #D4D4D4;
+    border-radius: 3px 3px 3px 3px;
+    color: #333333;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Helvetica,arial,freesans,clean,sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    height: 21px;
+    padding: 0 0 0 3px;
+    position: relative;
+    text-shadow: 1px 1px 0 #FFFFFF;
+    white-space: nowrap;
+}
+
+.minibutton > span {
+    display: block;
+    height: 21px;
+    line-height: 21px;
+    padding: 0 9px 0 7px;
 }
